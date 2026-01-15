@@ -142,6 +142,14 @@ def charger_articles_depuis_fichier():
                     continue
 
 
+# Fonction pour sauvegarder les articles dans le fichier articles.txt
+def saveArticlesToFile():
+    path = os.path.abspath("articles.txt")
+    with open(path, "w", encoding="utf-8") as f:
+        for id_art, d in mes_Articles.items():
+            line = f"{id_art};{d['nom']};{d['prix']};{d['quantite']};{d['stock_limite']}\n"
+            f.write(line)
+
 # # Mes tests d'utilisation
 # a = Article("Produit A", 10.5, 100, 20)
 # b = Article("Produit B", 10.5, 50, 30)

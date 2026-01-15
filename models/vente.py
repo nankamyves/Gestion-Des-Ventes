@@ -63,66 +63,88 @@ def calculateTotalPrice(id_article, quantite_vendue):
 
 
 # Fonction pour ajouter une nouvelle vente
+
 def addVente(new_vente):
-    # Je récupère le reste probable après la vente
-    reste_apres_vente = RestArticleQuantity(new_vente.id_article, new_vente.quantite_vendue)
-    if (reste_apres_vente < 0):
-        print(f"Vente impossible : stock insuffisant pour l'article ID {new_vente.id_article}-{article.mes_Articles[new_vente.id_article]['nom']}\n")
-        res = input("Voulez-vous vendre le reste du stock disponible ? (y/n) : ")
-        if res.lower() == 'y':
-            # Vendre le reste du stock
-            new_vente.quantite_vendue = article.mes_Articles[new_vente.id_article]['quantite']
-            # Mettre à jour le stock de l'article à 0
-            article.mes_Articles[new_vente.id_article]['quantite'] = 0
-            # Ajouter la vente
-            # mes_Ventes[new_vente.id_vente] = {
-            #     'id_vente': new_vente.id_vente,
-            #     'id_article': new_vente.id_article,
-            #     'nom': article.mes_Articles[new_vente.id_article]['nom'],
-            #     'quantite_vendue': new_vente.quantite_vendue, 
-            #     'date_vente': new_vente.date_vente,
-            # }
-            return addVente(new_vente)  # Appel récursif pour ajouter la vente avec la quantité ajustée
-        else:
-            print("La vente est annulée !\n")
-            return 0  # Retourne 0 si la vente est annulée
-    else:
-        # Ajouter la nouvelle vente aux données existantes
-        total_price = calculateTotalPrice(new_vente.id_article, new_vente.quantite_vendue)
-        print(f"Prix total de la vente : {total_price} \n")
-        mes_Ventes[new_vente.id_vente] = {
-            'id_vente': new_vente.id_vente,
-            'id_article': new_vente.id_article,
-            'nom': article.mes_Articles[new_vente.id_article]['nom'],
-            'quantite_vendue': new_vente.quantite_vendue, 
-            'date_vente': new_vente.date_vente,
-        }
-        print(f"Vente effectuée : {new_vente.quantite_vendue} unités de l'article ID {new_vente.id_article}-{article.mes_Articles[new_vente.id_article]['nom']}")
-        headers = ["ID Ventes", "ID Article","Nom De L'article", "Quantite Vendue", "Date Vente"]
-        données = []
-        # print("Dossier de travail actuel :", os.getcwd())
-        now = os.path.dirname(__file__)
-        chemin_fichier = os.path.join(now, "..", "ventes.txt")
-        chemin_final = os.path.abspath(chemin_fichier)
+    id_art = new_vente.id_article
+    qty_vendu = new_vente.quantite_vendue
     
-        for id_vente, details in mes_Ventes.items():
-            données.append([
-                id_vente, 
-                details['id_article'], 
-                details['nom'], 
-                details['quantite_vendue'],
-                details['date_vente'],
-        ])
+    if id_art in mes_Articles:
+        # MISE À JOUR CRUCIALE DU STOCK
+        mes_Articles[id_art]['quantite'] -= qty_vendu
+        
+        prix_unitaire = mes_Articles[id_art]['prix']
+        prix_total = prix_unitaire * qty_vendu
+        
+        mes_Ventes[new_vente.id_vente] = {
+            'id_article': id_art,
+            'quantite_vendue': qty_vendu,
+            'prix_total': prix_total,
+            'date_vente': new_vente.date_vente
+        }
+        return prix_total
+    return 0
 
-        # Générer le tableau
-        tableau_visuel = tabulate(données, headers, tablefmt="grid")
 
-        # Écrire (remplacer) les données dans le fichier
-        with open(chemin_final, "w", encoding="utf-8") as f:
-            f.write(tableau_visuel)
+# def addVente(new_vente):
+#     # Je récupère le reste probable après la vente
+#     reste_apres_vente = RestArticleQuantity(new_vente.id_article, new_vente.quantite_vendue)
+#     if (reste_apres_vente < 0):
+#         print(f"Vente impossible : stock insuffisant pour l'article ID {new_vente.id_article}-{article.mes_Articles[new_vente.id_article]['nom']}\n")
+#         res = input("Voulez-vous vendre le reste du stock disponible ? (y/n) : ")
+#         if res.lower() == 'y':
+#             # Vendre le reste du stock
+#             new_vente.quantite_vendue = article.mes_Articles[new_vente.id_article]['quantite']
+#             # Mettre à jour le stock de l'article à 0
+#             article.mes_Articles[new_vente.id_article]['quantite'] = 0
+#             # Ajouter la vente
+#             # mes_Ventes[new_vente.id_vente] = {
+#             #     'id_vente': new_vente.id_vente,
+#             #     'id_article': new_vente.id_article,
+#             #     'nom': article.mes_Articles[new_vente.id_article]['nom'],
+#             #     'quantite_vendue': new_vente.quantite_vendue, 
+#             #     'date_vente': new_vente.date_vente,
+#             # }
+#             return addVente(new_vente)  # Appel récursif pour ajouter la vente avec la quantité ajustée
+#         else:
+#             print("La vente est annulée !\n")
+#             return 0  # Retourne 0 si la vente est annulée
+#     else:
+#         # Ajouter la nouvelle vente aux données existantes
+#         total_price = calculateTotalPrice(new_vente.id_article, new_vente.quantite_vendue)
+#         print(f"Prix total de la vente : {total_price} \n")
+#         mes_Ventes[new_vente.id_vente] = {
+#             'id_vente': new_vente.id_vente,
+#             'id_article': new_vente.id_article,
+#             'nom': article.mes_Articles[new_vente.id_article]['nom'],
+#             'quantite_vendue': new_vente.quantite_vendue, 
+#             'date_vente': new_vente.date_vente,
+#         }
+#         print(f"Vente effectuée : {new_vente.quantite_vendue} unités de l'article ID {new_vente.id_article}-{article.mes_Articles[new_vente.id_article]['nom']}")
+#         headers = ["ID Ventes", "ID Article","Nom De L'article", "Quantite Vendue", "Date Vente"]
+#         données = []
+#         # print("Dossier de travail actuel :", os.getcwd())
+#         now = os.path.dirname(__file__)
+#         chemin_fichier = os.path.join(now, "..", "ventes.txt")
+#         chemin_final = os.path.abspath(chemin_fichier)
+    
+#         for id_vente, details in mes_Ventes.items():
+#             données.append([
+#                 id_vente, 
+#                 details['id_article'], 
+#                 details['nom'], 
+#                 details['quantite_vendue'],
+#                 details['date_vente'],
+#         ])
 
-        print(f"Vente effectuée...")
-        return total_price # Retourne le prix réel de la vente effectuée
+#         # Générer le tableau
+#         tableau_visuel = tabulate(données, headers, tablefmt="grid")
+
+#         # Écrire (remplacer) les données dans le fichier
+#         with open(chemin_final, "w", encoding="utf-8") as f:
+#             f.write(tableau_visuel)
+
+#         print(f"Vente effectuée...")
+#         return total_price # Retourne le prix réel de la vente effectuée
 
 
 
@@ -174,6 +196,9 @@ def confirmPossibleVentes():
                 'prix_unitaire': info_art['prix'],
                 'prix_total': prix_reel
             })
+    from .article import saveArticlesToFile
+    saveArticlesToFile() # On écrase le fichier avec les nouvelles quantités
+    clearPossibleVentes()
     
     # Génération de la facture globale si au moins une vente a réussi
     if total_facture > 0:

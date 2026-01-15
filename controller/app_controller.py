@@ -97,20 +97,29 @@ class AppController:
             data.append((id_v, nom_art, d['quantite_vendue']))
         return data
 
+
     def lire_historique_fichier(self):
-        """Lit le fichier ventes.txt pour l'afficher"""
-        content = "Aucun historique disponible."
-        now = os.path.dirname(__file__)
-        path = os.path.join(now, "..", "ventes.txt") # Ajuster selon votre structure
-        # Dans votre structure, le controller est dans /controllers, donc remonter 2 fois ?
-        # Assumons que main.py lance tout, le chemin relatif dépend du CWD.
-        # Utilisons un chemin relatif robuste:
-        path = os.path.abspath("ventes.txt")
-        
+        # Forcer le chemin absolu à la racine du projet
+        path = os.path.join(os.getcwd(), "ventes.txt")
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
-                content = f.read()
-        return content
+                return f.read()
+        return "Aucun historique trouvé dans ventes.txt"
+
+    # def lire_historique_fichier(self):
+    #     """Lit le fichier ventes.txt pour l'afficher"""
+    #     content = "Aucun historique disponible."
+    #     now = os.path.dirname(__file__)
+    #     path = os.path.join(now, "..", "ventes.txt") # Ajuster selon votre structure
+    #     # Dans votre structure, le controller est dans /controllers, donc remonter 2 fois ?
+    #     # Assumons que main.py lance tout, le chemin relatif dépend du CWD.
+    #     # Utilisons un chemin relatif robuste:
+    #     path = os.path.abspath("ventes.txt")
+        
+    #     if os.path.exists(path):
+    #         with open(path, "r", encoding="utf-8") as f:
+    #             content = f.read()
+    #     return content
 
     # def refresh_article_list(self):
     #     self.view.update_articles_table(self.get_articles_data())
@@ -122,3 +131,23 @@ class AppController:
 
     def refresh_panier_list(self):
         self.view.update_panier_table(self.get_panier_data())
+
+    # Méthodes de gestion des articles(supprimer_article, modifier_article)
+    def supprimer_article(self, id_article):
+        if id_article in mes_Articles:
+            del mes_Articles[id_article]
+            self.refresh_article_list()
+            messagebox.showinfo("Succès", "Article supprimé.")
+
+    def modifier_article(self, id_art, nouveau_nom, nouveau_prix):
+        if id_art in mes_Articles:
+            mes_Articles[id_art]['nom'] = nouveau_nom
+            mes_Articles[id_art]['prix'] = float(nouveau_prix)
+            self.refresh_article_list()
+
+    # Méthode pour annuler le panier
+    def annuler_panier(self):
+        from models.vente import clearPossibleVentes
+        clearPossibleVentes()
+        self.refresh_panier_list()
+        messagebox.showinfo("Panier", "Ventes en attente annulées.")

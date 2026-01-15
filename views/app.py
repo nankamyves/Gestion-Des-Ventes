@@ -38,9 +38,18 @@ class MainView(tk.Tk):
         self.controller = controller
 
     def show_dashboard(self):
+        # On annule le rappel automatique s'il existe pour éviter le double appel
+        if hasattr(self, '_after_id'):
+            self.after_cancel(self._after_id)
+            
+        if self.dashboard_frame.winfo_ismapped(): # Si déjà affiché, on ne fait rien
+            return
         self.welcome_frame.pack_forget()
         self.dashboard_frame.pack(fill="both", expand=True)
         self.setup_dashboard()
+        # Charger les données APRÈS que les widgets soient créés
+        if self.controller:
+            self.controller.refresh_article_list()
 
     def setup_dashboard(self):
         # Création des onglets
